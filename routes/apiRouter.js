@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express')
+const jwt = require('jsonwebtoken')
 const apiRouter = express.Router()
 
 const knex = require('knex') ({
@@ -12,22 +13,50 @@ const knex = require('knex') ({
     }
 })
 
-// const checkToken = (req, res, next) =>{
-//     let authHeader = req.get('Authorization')
-//     if(!authHeader){
-//         res.status(403).json({message: 'Token requerida'});
-//         res.end();
-//     } else{
-//         console.log(authHeader)
-//         let token = authHeader.split(' ')[1]
-//         req.role = token;
-//         next();
-//     }
-// }
+const checkToken = (req, res, next) =>{ 
+    let authHeader = req.get('Authorization')
+    if(!authHeader){
+        res.status(403).json({message: 'Token requerida'});
+        res.end();
+    } else{
+        let token = authHeader.split(' ')[1]
+        jwt.verify(token, process.env.SECRET_KEY, (err, decodedToken) => {
+            if (err) {
+                res.status(401).json({message: 'Token inválida'})
+                res.end()
+            }
+            else{
+                req.token = decodedToken;
+                req.userId = decodedToken.id;
+                next()
+            }
+        })
+    }
+}
 
-// const isAdmin = (req, res, next) => {
-//     if (req.role && )
-// }
+const isAdmin = (req, res, next) => { //2:38
+    knex 
+        .select ('*').from ('usuario').where({ id: req.userId }) 
+        .then ((usuarios) => { 
+            if (usuarios.length) { 
+                let usuario = usuarios[0] 
+                let roles = usuario.roles.split(';') 
+                let adminRole = roles.find(i => i === 'ADMIN') 
+                if (adminRole === 'ADMIN') { 
+                    next() 
+                    return 
+                } 
+                else { 
+                    res.status(403).json({ message: 'Role de ADMIN requerida' }) 
+                    return 
+                } 
+            } 
+        }) 
+        .catch (err => { 
+            res.status(500).json({  
+              message: 'Erro ao verificar roles de usuário - ' + err.message }) 
+        }) 
+}
 
 //Lista filmes
 
@@ -46,7 +75,7 @@ apiRouter.get('/filmes', function (req, res) {
 
 //Lista filme por id
 
-apiRouter.get('/filmes/:id', function (req, res) {
+apiRouter.get('/filmes/:id', checkToken, function (req, res) {
     let id = Number.parseInt(req.params.id);
     
     if (id > 0) {
@@ -54,7 +83,7 @@ apiRouter.get('/filmes/:id', function (req, res) {
           .select("*")
           .from("filmes")
           .where('id', id)
-          .then(filmes => res.json(filmes))
+          .then(filmes => res.status(200).json(filmes))
           .catch(err => {
             res.status(500).json({
                 message: 'Erro ao recuperar filmes - ' + err.message
@@ -62,14 +91,14 @@ apiRouter.get('/filmes/:id', function (req, res) {
         })
     } else {
         res.status(404).json({
-            message: "filmes não encontrado"
+            message: "filme não encontrado"
         })
     }
 })
 
 //Cria novo filme
 
-apiRouter.post('/filmes', express.json(), function (req, res){
+apiRouter.post('/filmes', express.json(), checkToken, isAdmin, function (req, res){
     knex('filmes')
         .insert({
             titulo: req.body.titulo,
