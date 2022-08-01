@@ -60,7 +60,7 @@ const isAdmin = (req, res, next) => { //2:38
 
 //Lista filmes
 
-apiRouter.get('/filmes', function (req, res) {
+apiRouter.get('/filmes', checkToken, function (req, res) {
 
     knex
         .select("*")
@@ -115,7 +115,7 @@ apiRouter.post('/filmes', express.json(), checkToken, isAdmin, function (req, re
 
 //Atualiza filme
 
-apiRouter.put('/filmes/:id', function (req, res) {
+apiRouter.put('/filmes/:id', checkToken, isAdmin, function (req, res) {
     let id = Number.parseInt(req.params.id);
     if (id > 0) {
         knex('filmes')
@@ -140,7 +140,7 @@ apiRouter.put('/filmes/:id', function (req, res) {
 
 //Deleta filme
 
-apiRouter.delete('/filmes/:id', function (req, res) {
+apiRouter.delete('/filmes/:id', checkToken, isAdmin, function (req, res) {
     let id = Number.parseInt(req.params.id);
     if (id > 0) {
         knex('filmes')
