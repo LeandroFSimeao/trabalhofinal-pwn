@@ -12,98 +12,116 @@ const knex = require('knex') ({
     }
 })
 
-//Lista produtos
+// const checkToken = (req, res, next) =>{
+//     let authHeader = req.get('Authorization')
+//     if(!authHeader){
+//         res.status(403).json({message: 'Token requerida'});
+//         res.end();
+//     } else{
+//         console.log(authHeader)
+//         let token = authHeader.split(' ')[1]
+//         req.role = token;
+//         next();
+//     }
+// }
 
-apiRouter.get('/produtos', function (req, res) {
+// const isAdmin = (req, res, next) => {
+//     if (req.role && )
+// }
+
+//Lista filmes
+
+apiRouter.get('/filmes', function (req, res) {
 
     knex
         .select("*")
-        .from("produto")
-        .then(produtos => res.status(200).json(produtos))
+        .from("filmes")
+        .then(filmes => res.status(200).json(filmes))
         .catch(err => {
             res.status(500).json({
-                message: 'Erro ao recuperar produtos - ' + err.message
+                message: 'Erro ao recuperar filmes - ' + err.message
             })
         })
 })
 
-//Lista produto por id
+//Lista filme por id
 
-apiRouter.get('/produtos/:id', function (req, res) {
+apiRouter.get('/filmes/:id', function (req, res) {
     let id = Number.parseInt(req.params.id);
     
     if (id > 0) {
         knex
           .select("*")
-          .from("produto")
+          .from("filmes")
           .where('id', id)
-          .then(produtos => res.json(produtos))
+          .then(filmes => res.json(filmes))
           .catch(err => {
             res.status(500).json({
-                message: 'Erro ao recuperar produtos - ' + err.message
+                message: 'Erro ao recuperar filmes - ' + err.message
             })
         })
     } else {
         res.status(404).json({
-            message: "Produto não encontrado"
+            message: "filmes não encontrado"
         })
     }
 })
 
-//Cria novo produto
+//Cria novo filme
 
-apiRouter.post('/produtos', express.json(), function (req, res){
-    knex('produto')
+apiRouter.post('/filmes', express.json(), function (req, res){
+    knex('filmes')
         .insert({
-            descricao: req.body.descricao,
-            valor: req.body.valor,
-            marca: req.body.marca},
-            ['id', 'descricao', 'valor', 'marca'])
-        .then (produtos => {
-            let produto = produtos[0]
-            res.status(201).json ({ produto })
+            titulo: req.body.titulo,
+            diretor: req.body.diretor,
+            genero: req.body.genero,
+            duracao: req.body.duracao},
+            ['id', 'titulo', 'diretor', 'genero','duracao'])
+        .then (filmes => {
+            let filme = filmes[0]
+            res.status(201).json ({ filme })
         })
-        .catch (err => res.status(500).json ({ message: `Erro ao inserir produto ${err.message}`}))
+        .catch (err => res.status(500).json ({ message: `Erro ao inserir filme ${err.message}`}))
 })
 
-//Atualiza produto
+//Atualiza filme
 
-apiRouter.put('/produtos/:id', function (req, res) {
+apiRouter.put('/filmes/:id', function (req, res) {
     let id = Number.parseInt(req.params.id);
     if (id > 0) {
-        knex('produto')
+        knex('filmes')
             .where('id', id)
             .update({
-                descricao: req.body.descricao,
-                valor: req.body.valor,
-                marca: req.body.marca
-            },
-            ['id','descricao','valor','marca'])
-            .then (produtos => {
-                let produto = produtos[0]
-                res.status(200).json({produto})
+                titulo: req.body.titulo,
+                diretor: req.body.diretor,
+                genero: req.body.genero,
+                duracao: req.body.duracao},
+                ['id', 'titulo', 'diretor', 'genero','duracao'])
+            .then (filmes => {
+                let filme = filmes[0]
+                res.status(200).json({filme})
             })
-            .catch (err => res.status(500).json ({ message: `Erro ao atualizar produto ${err.message}`}))
+            .catch (err => res.status(500).json ({ message: `Erro ao atualizar filme ${err.message}`}))
     } else {
         res.status(404).json({
-            message: "Produto não encontrado"
+            message: "filme não encontrado"
         })
     }
 })
 
-//Deleta produto
+//Deleta filme
 
-apiRouter.delete('/produtos/:id', function (req, res) {
+apiRouter.delete('/filmes/:id', function (req, res) {
     let id = Number.parseInt(req.params.id);
     if (id > 0) {
-        knex('produto')
+        knex('filmes')
           .where('id', id)
           .del()
-          .then(res.status(200).json({message: `Produto ${id} excluído com sucesso`}))
-          .catch (err => res.status(500).json ({ message: `Erro ao deletar produto ${err.message}`}))
+          .then(res.status(200).json({message: `filme ${id} excluído com sucesso`}))
+          .catch (err => res.status(500).json ({ message: `Erro ao deletar filme ${err.message}`}))
     } else {
         res.status(404).json({
-            message: "Produto não encontrado"
+            message: "filme não encontrado"
         })
     }
 })

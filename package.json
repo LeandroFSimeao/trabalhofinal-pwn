@@ -1,7 +1,7 @@
 {
-  "name": "exercicio2",
+  "name": "exercicio-4",
   "version": "1.0.0",
-  "description": "CRUD lista de produtos",
+  "description": "CRUD lista de Filmes",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
