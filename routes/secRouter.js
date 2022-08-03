@@ -49,7 +49,19 @@ knex
 });
 
 secRouter.post ('/register', express.json(), (req, res) => {
-
+    knex('usuario')
+        .insert({
+            nome: req.body.nome,
+            email: req.body.email,
+            login: req.body.login,
+            senha: bcrypt.hashSync(req.body.senha, 8)},
+            ['id'])
+        .then (result => {
+            let usuario = result[0]
+            res.status(200).json ({ "id": usuario.id })
+            return
+        })
+        .catch (err => res.status(500).json ({ message: `Erro ao registrar usuario ${err.message}`}))
 
 });
 
